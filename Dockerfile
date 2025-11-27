@@ -1,4 +1,4 @@
-FROM runpod/cuda:12.1.0-runtime
+FROM runpod/base:0.6.2-cuda12.1.0
 
 # Use a neutral, safe working directory
 WORKDIR /workspace
