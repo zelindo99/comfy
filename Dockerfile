@@ -1,4 +1,4 @@
-FROM runpod/base:0.6.2-cuda12.1.0
+FROM runpod/serverless:latest
 
 # Use a neutral, safe working directory
 WORKDIR /workspace
