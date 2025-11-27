@@ -1,34 +1,31 @@
-FROM runpod/serverless:latest
+FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 
-# Use a neutral, safe working directory
 WORKDIR /workspace
 
-# System dependencies required by ComfyUI
+# System deps
 RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
     git \
     ffmpeg \
     libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
+# Install PyTorch (CUDA 12.1)
+RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
 # Install RunPod serverless SDK
 RUN pip install --no-cache-dir runpod
 
-# Copy ComfyUI requirements into the image
-# IMPORTANT: this must match your /runpod-volume/comfyui installation
+# Install ComfyUI Python deps
 COPY requirements.txt /tmp/requirements.txt
-
-# Install ComfyUI dependencies at build time
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Copy serverless files
+# Serverless worker files
 COPY handler.py /handler.py
 COPY entrypoint.sh /entrypoint.sh
-
-# Ensure entrypoint is executable
 RUN chmod +x /entrypoint.sh
 
-# ComfyUI will be loaded from the network volume at runtime
 ENV COMFY_HOME=/runpod-volume/comfyui
 
-# Start RunPod serverless runtime
 CMD ["/entrypoint.sh"]
