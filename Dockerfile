@@ -1,5 +1,4 @@
-FROM runpod/pytorch:3.10-2.1.2-cuda12.1-runtime
-
+FROM runpod/pytorch:3.10-2.1.0-cuda12.1
 # Use a neutral, safe working directory
 WORKDIR /workspace
 
