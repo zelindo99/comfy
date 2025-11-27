@@ -4,18 +4,18 @@ WORKDIR /workspace
 
 # System deps
 RUN apt-get update && apt-get install -y \
-    python3.12 \
-    python3.12-venv \
+    python3 \
+    python3-venv \
     python3-pip \
     git \
     ffmpeg \
     libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create virtual environment
-RUN python3.12 -m venv /opt/venv
+# Create virtual environment (using python3.10)
+RUN python3 -m venv /opt/venv
 
-# Activate venv for all future commands
+# Activate venv for all subsequent commands
 ENV PATH="/opt/venv/bin:${PATH}"
 
 # Upgrade pip inside venv
@@ -24,7 +24,7 @@ RUN pip install --upgrade pip wheel setuptools
 # Install PyTorch (CUDA 12.1)
 RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
-# Install RunPod SDK (this installs runpod-serverless inside /opt/venv/bin)
+# Install RunPod serverless SDK
 RUN pip install runpod
 
 # Install ComfyUI deps
