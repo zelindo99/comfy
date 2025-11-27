@@ -3,7 +3,7 @@ FROM runpod/pytorch:3.10-2.1.2-cuda12.1-runtime
 # Use a neutral, safe working directory
 WORKDIR /workspace
 
-# System deps needed by ComfyUI
+# System dependencies required by ComfyUI
 RUN apt-get update && apt-get install -y \
     git \
     ffmpeg \
@@ -14,17 +14,21 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir runpod
 
 # Copy ComfyUI requirements into the image
-# IMPORTANT: this must be the same file from your /runpod-volume/comfyui installation
-COPY requirements-comfyui.txt /tmp/requirements.txt
+# IMPORTANT: this must match your /runpod-volume/comfyui installation
+COPY requirements.txt /tmp/requirements.txt
 
-# Install ComfyUI dependencies at build time (fast serverless startup)
+# Install ComfyUI dependencies at build time
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Copy handler
+# Copy serverless files
 COPY handler.py /handler.py
+COPY entrypoint.sh /entrypoint.sh
 
-# ComfyUI will be loaded from /runpod-volume/comfyui at runtime
+# Ensure entrypoint is executable
+RUN chmod +x /entrypoint.sh
+
+# ComfyUI will be loaded from the network volume at runtime
 ENV COMFY_HOME=/runpod-volume/comfyui
 
-# Run serverless handler immediately
-CMD ["runpod-serverless"]
+# Start RunPod serverless runtime
+CMD ["/entrypoint.sh"]
