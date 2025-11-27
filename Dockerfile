@@ -2,31 +2,34 @@ FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 
 WORKDIR /workspace
 
-# Install Python + pip + dependencies
+# System deps
 RUN apt-get update && apt-get install -y \
-    python3 \
+    python3.12 \
+    python3.12-venv \
     python3-pip \
-    python3-distutils \
-    python3-venv \
     git \
     ffmpeg \
     libgl1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Ensure pip and python commands exist
-RUN ln -s /usr/bin/python3 /usr/bin/python || true
-RUN ln -s /usr/bin/pip3 /usr/bin/pip || true
+# Create virtual environment
+RUN python3.12 -m venv /opt/venv
+
+# Activate venv for all future commands
+ENV PATH="/opt/venv/bin:${PATH}"
+
+# Upgrade pip inside venv
+RUN pip install --upgrade pip wheel setuptools
 
 # Install PyTorch (CUDA 12.1)
-RUN pip install --no-cache-dir torch torchvision torchaudio \
-    --index-url https://download.pytorch.org/whl/cu121
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
-# Install RunPod serverless SDK
-RUN pip install --no-cache-dir runpod
+# Install RunPod SDK (this installs runpod-serverless inside /opt/venv/bin)
+RUN pip install runpod
 
-# Install ComfyUI python deps
+# Install ComfyUI deps
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
 
 # Worker files
 COPY handler.py /handler.py
